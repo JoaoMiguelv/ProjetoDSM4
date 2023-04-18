@@ -11,11 +11,12 @@ const Login = () => {
     const handleLogin = () => {
         // Implementar lógica de login
         console.log(`Email: ${email} - Password: ${password}`);
-        if (email === 'admin' && password === '123') {
-            navigation.navigate('Main')
-        } else {
-            alert('Usuário ou senha inválidos')
-        }
+        navigation.navigate('Main')
+        // if (email === 'admin' && password === '123') {
+        //     navigation.navigate('Main')
+        // } else {
+        //     alert('Usuário ou senha inválidos')
+        // }
     }
 
     return (
