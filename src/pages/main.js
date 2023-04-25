@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { Keyboard } from 'react-native'
+import { Keyboard, ActivityIndicator } from 'react-native'
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { Container, Form, Input, SubmitButton, List, User, Name, Avatar, Bio, ProfileButton, ProfileButtonText } from "./styles";
 import api from "../services/api";
@@ -8,12 +9,29 @@ export default class Main extends Component {
     state = {
         newUser: "",
         users: [],
+        loading: false
+    }
+
+    async componentDidMount() { // busca os dados do storage
+        const users = await AsyncStorage.getItem('users')
+        if (users) {
+            this.setState({ users: JSON.parse(users) })
+        }
+    }
+
+    async componentDidUpdate(_, prevState) { // salva os dados no storage 
+        const { users } = this.state;
+
+        if (prevState.users !== users) {
+            await AsyncStorage.setItem('users', JSON.stringify(users))
+        }
     }
 
     handleAddUser = async () => {
-        //console.log(this.state.newUser);
         const { users, newUser } = this.state
+        this.setState({ loading: true })
         const response = await api.get(`/users/${newUser}`)
+
 
         const data = {
             name: response.data.name,
@@ -24,13 +42,14 @@ export default class Main extends Component {
 
         this.setState({
             users: [...users, data],
-            newUser: ''
+            newUser: '',
+            loading: false
         })
         Keyboard.dismiss()
     }
 
     render() {
-        const { newUser, users } = this.state;
+        const { newUser, users, loading } = this.state;
         return (
             <Container>
                 <Form>
@@ -44,8 +63,8 @@ export default class Main extends Component {
                         onSubmitEditing={this.handleAddUser}
                     />
 
-                    <SubmitButton onPress={this.handleAddUser}>
-                        <Icon name="add" size={20} color="#FFF" />
+                    <SubmitButton loading={loading} onPress={this.handleAddUser}>
+                        {loading ? (<ActivityIndicator color='#FFF' />) : <Icon name="add" size={20} color="#FFF" />}
                     </SubmitButton>
                 </Form>
 
